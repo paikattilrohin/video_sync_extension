@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>videosyncp</title>
+     
+    <link rel="stylesheet" type="text/css" href="css/ui.css" />
+    <link rel="stylesheet" type="text/css" href="css/popup.css" />
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <div id="main">
+      
+      <div class="block" id="logo">Watch Together</div>
+      <input class="block" id="name" type="text" name="name" placeholder="Name" />
+      <input class="block" id="room name" type="text" name="room name" placeholder="Room Name" />
+      <input class="block" id="room" type="text" name="room" placeholder="Secret Code" />
+
+      <div class="block" id="error"></div>
+
+      <input class="block button" id="connect" type="button" name="connect" value="Connect" />
+
+      <br>
+
+      <!-- <label for= "sync netflix" class = "block"> Ignore URL </label> -->
+     <input type="checkbox" id ="ignore_url" , class="checkbox_input"> Ignore Url(Can Sync netflix etc, if everyone is on same video) 
+      <br>
+      <!-- <label for= "sync netflix" class = "block">  </label> -->
+      <br>
+      <input class="block button" id="video" type="button" name="join_video" value="Join Video Chat" />
+
+
+
+      <div class="block" id="usersListTitle">Users in room:</div>
+      <ul id="usersList"></ul>
+
+      <div class="block" id="status">Status:</div>
+      <!-- <input class="block button" id="Sync" type="button" name="share" value="Sync" /> -->
+
+      <!-- test buttons -->
+      <input class="block button" id="joinlink" type="button" name="joinlink" value="Join Link" />
+      <input class="block button" id="sync" type="button" name="testbutton" value="Sync" />
+
+                                        <!-- | -->
+      <input class="block button" id="testbutton5" type="button" name="testbutton" value="change URL" />
+      <input class="block button" id="testbutton6" type="button" name="testbutton" value="page tab" />
+      <input class="block button" id="testbutton3" type="button" name="testbutton" value="pause" />
+      <input class="block button" id="testbutton4" type="button" name="testbutton" value="show_synced_tab" />
+      <input class="block button" id="testbutton7" type="button" name="testbutton" value="f" />
+
+
+    </div>
+  </body>
+  <script src="javascript/popup.js"></script>
+</html>

@@ -1,0 +1,40 @@
+{
+    "manifest_version": 2,
+    "name": "VideoSyncChat",
+    "description": "Video sync chat",
+    "version": "1.0",
+    "options_ui": {
+      "page": "options.html",
+      "open_in_tab": false
+    },
+    "background": {
+      "persistent": true,
+      "scripts": [
+        "javascript/socket.io.min.js",
+        "javascript/background.js"
+      ]
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["javascript/content.js"]
+      }
+    ],
+    "icons": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "browser_action": {
+      "default_icon": "icons/icon128.png",
+      "default_title": "videosync",
+      "default_popup": "popup.html"
+    },
+    "incognito": "split",
+    "permissions": [
+      "<all_urls>",
+      "tabs",
+      "storage",
+      "notifications"
+    ]
+  }

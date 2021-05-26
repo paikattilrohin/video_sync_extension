@@ -1,0 +1,64 @@
+-------------------------------------------------------
+Supported actions:-
+
+Video-> pause:
+        change_time:
+        play:
+Url->   ignore url -> True false:
+        ignore url -> True: maintain state and once one person enables url ignore broadcast to everyone
+
+-------------------------------------------------------
+
+Serverside: (Relay events)
+Keep track of who joins last 
+Current URL playing and time
+handle make sure room created doesn't already exist else join room 
+
+-------------------------------------------------------
+background: 
+maintain active managed windows for sync & video chat
+        -- If person clicks on share video window in shared tab sent to everone 
+           and once a window is created for sharing every change is in that window.
+maintain state of Ignore URL True/False
+maintain state of whether script is injected into active window
+
+maintain socket connection detect changes->
+        send changes to content.js if video changes
+        URL -> ignore url: True:
+                            send only video changes to content js 
+                           False:
+                            Do all changes to 
+
+Detect local changes and transmit -> 
+        broadcast changes according to options
+        notification when someone clicks on sharevideo
+
+-------------------------------------------------------
+popup:
+Connecting to room:
+                    Setup socket connection
+
+Share video:
+        URL -> ignore url: True:
+                            only video changes
+                           False:
+                            Do all changes
+
+Ignore URL check/uncheck : send data to background to track state
+
+
+
+-------------------------------------------------------
+content (injected script):
+update current time every 15 mins from room
+local changes send to broadcast
+receive changes from background and change handle changes
+
+-------------------------------------------------------
+
+
+
+
+chrome tab loading issue fix:
+https://stackoverflow.com/questions/2149917/chrome-extensions-how-to-know-when-a-tab-has-finished-loading-from-the-backgr/44864966#44864966
+https://stackoverflow.com/questions/4402287/javascript-remove-event-listener
