@@ -65,6 +65,20 @@
     box-shadow: 1px 1px 1px 0 #ccc;
   }
   
+  .button_connected {
+    border-radius: 3px;
+    background: rgb(23, 168, 30);
+    color: white;
+    box-shadow: 1px 1px 1px 0 #ccc;
+  }
+  
+  .button_connecting {
+    border-radius: 3px;
+    background: grey;
+    color: white;
+    box-shadow: 1px 1px 1px 0 #ccc;
+  }
+
   .button:active {
     box-shadow: 1px 1px 1px 0 #fff;
   }

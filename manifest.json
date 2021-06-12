@@ -14,19 +14,13 @@
         "javascript/background.js"
       ]
     },
-    "content_scripts": [
-      {
-        "matches": ["<all_urls>"],
-        "js": ["javascript/content.js"]
-      }
-    ],
     "icons": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "icons/paikro_16.png",
+      "48" : "icons/paikro_48.png",
+      "128" : "icons/paikro_128.png"
     },
     "browser_action": {
-      "default_icon": "icons/icon128.png",
+      "default_icon": "icons/paikro_128.png",
       "default_title": "videosync",
       "default_popup": "popup.html"
     },
