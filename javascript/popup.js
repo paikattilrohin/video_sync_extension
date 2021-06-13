@@ -14,9 +14,10 @@ const favicon_element = document.getElementById("video_favicon");
 const video_link_button_element = document.getElementById("video_link_button");
 const ignore_url_checkbox_element = document.getElementById("ignore_url_input");
 const ignore_url_sync_input_button_element = document.getElementById("sync_ignore_url");
+const sync_window_checkbox_element = document.getElementById("sync_window");
 
 let connect_reply_lock = false;
-
+let share_button_clicked = false;
 
 function show_connect_disconnect_elements() {
   // console.log("show hide");
@@ -48,6 +49,14 @@ function show_connect_disconnect_elements() {
     share_button_element.className = "show block button";
   }
 
+  if(localStorage.SYNCWINDOW && localStorage.SYNCWINDOW == "true"){
+    sync_window_checkbox_element.checked = true;
+  }
+
+  else{
+    sync_window_checkbox_element.checked = false;
+  }
+
   if (localStorage.CONNECTED === "true") {
     connect_element.className = "block button_connected";
     connect_element.value = "Disconnect"
@@ -65,6 +74,18 @@ function show_connect_disconnect_elements() {
 }
 
 show_connect_disconnect_elements();
+
+sync_window_checkbox_element.onclick = () => {
+  if(sync_window_checkbox_element.checked){
+    localStorage.SYNCWINDOW = true;
+    if(ignore_url_checkbox_element.checked){
+      ignore_url_checkbox_element.click();
+    }
+  }
+  else{
+    localStorage.SYNCWINDOW = false;
+  }
+};
 
 
 connect_element.onclick = () => {
@@ -111,6 +132,9 @@ ignore_url_checkbox_element.onclick = () => {
   if(ignore_url_checkbox_element.checked) {
     ignore_url_sync_input_button_element.className = "show block button";
     share_button_element.className = "hide block button";
+    if(sync_window_checkbox_element.checked){
+      sync_window_checkbox_element.click();
+    }
   }
   else {
     ignore_url_sync_input_button_element.className = "hide block button";
@@ -119,21 +143,29 @@ ignore_url_checkbox_element.onclick = () => {
 };
 
 ignore_url_sync_input_button_element.onclick = () => {
-
+  chrome.runtime.sendMessage({
+    from: 'popup',
+    action: 'ignore_url_and_sync',
+    data: {
+    }
+  });
 
 };
 
 video_link_button_element.onclick = () => {
   chrome.runtime.sendMessage({
     from: "popup",
-    action: "videolinkclick",
+    action: "video_link_click",
     data: {
-      ignore_url: localStorage.IGNOREURL
+      ignore_url: localStorage.IGNOREURL,
+      link: localStorage.LINK
     }
   });
 };
 
 share_button_element.onclick = () => {
+  console.log("setting clicked button to true");
+  share_button_clicked = true;
   chrome.runtime.sendMessage({
     from: "popup",
     action: "share",
@@ -209,8 +241,14 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     if (message.data.link) {
       localStorage.LINK = message.data.link;
     }
-    console.log(localStorage.VIDEOTITLE, localStorage.FAVICON, localStorage.LINK);
+    console.log(share_button_clicked);
+    if(localStorage.SYNCWINDOW === "true" && !share_button_clicked){
+      video_link_button_element.click();
+      // TODO: add sync window logic here
+    }    
     show_connect_disconnect_elements();
+    share_button_clicked = false;
+    console.log(share_button_clicked);
   }
 });
 

@@ -5,17 +5,18 @@ let snctab = null;
 let urlLink = "synced_tab.html";
 let current_video_time = null;
 let injected = false;
+let synced_tabs = {}
 
-// let serverConnection = "ws://localhost:8080"
+let serverConnection = "ws://localhost:8080"
 
 // let serverConnection = "http://40.76.246.136";
-let serverConnection = "https://video-sync-extension.herokuapp.com/";
+// let serverConnection = "https://video-sync-extension-server.herokuapp.com/";
 
 let connected_state = false;
 let socket = null;
 
 async function timeout(milliseconds) {
-  return new Promise(resolve => { setTimeout(resolve, milliseconds) });
+  return new Promise(resolve => { setTimeout(() => { resolve(); }, milliseconds) });
 }
 
 async function initSockets() {
@@ -30,7 +31,6 @@ async function initSockets() {
         reconnectionDelay: 5000,
         reconnectionAttempts: 0,
       });
-      console.log("waiting properly");
     }
   }
   catch (error) {
@@ -56,8 +56,7 @@ async function initSockets() {
   });
 
   socket.on("share", data => {
-    console.log(data);
-    sendMessageToPopup("share", data.video_details );
+    sendMessageToPopup("share", data.video_details);
   });
 
   socket.on("disconnect", (data) => {
@@ -66,15 +65,31 @@ async function initSockets() {
   });
 
   socket.on("connect_error", (error) => {
-    // console.log("ERROR CAUGHT BY LISTENER",error);
     sendMessageToPopup("enter", { 'successful': false, 'reason': 'Server Unreachable' });
+  });
+
+  socket.on("get_time", () => {
+    if (synced_tab != null && synced_tabs[synced_tab.id].injected == true) {
+      sendMessageToSyncedTab("get_time", {});
+    }
+  });
+
+  socket.on("transmit_video_event",(data)=>{
+    // on receiving video event from others make changes
+    console.log("--->>transmit event received back \n  ", data);
+    sendMessageToSyncedTab("receive_video_event", data);
   });
 }
 
 initSockets();
 
+function syncCurrentTab() {
+  synced_tab = getCurrentTab();
+  updateSyncedTabs(synced_tabs);
+  injectScriptInTab(synced_tab);
+}
+
 function injectScriptInTab(tab) {
-  console.log("called inject with tab", tab);
   if (tab !== null && injected == false) {
     console.log("injecting to script");
     chrome.tabs.executeScript(
@@ -91,8 +106,8 @@ function injectScriptInTab(tab) {
         }
       }
     );
-    injected = True;
-    console.log("I successful");
+    injected = true;
+    console.log("Injected successful");
   }
 }
 
@@ -143,13 +158,19 @@ async function handleConnection(data) {
   socket.emit('enter', data);
 }
 
+function updateSyncedTabs(tab) {
+  if (!(tab.id in synced_tabs)) {
+    synced_tabs[tab.id] = {}
+    synced_tabs[tab.id].tab = tab;
+  }
+}
+
 function updateTab(tab, updateUrl) {
   return new Promise((resolve) => {
-    chrome.tabs.update(tab.id, { url: updateUrl }, async (tab) => {
+    chrome.tabs.update(tab.id, { url: updateUrl, active: true }, async (tab) => {
       chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
         if (info.status === "complete" && tabId === tab.id) {
           chrome.tabs.onUpdated.removeListener(listener);
-          console.log("Page loaded");
           injectScriptInTab(tab);
           resolve(tab);
         }
@@ -182,19 +203,20 @@ function getCurrentTab() {
   });
 }
 
-async function syncTab(data) {
+
+async function joinVideoWatch(data) {
   ignore_url = data.ignore_url;
-  console.log(ignore_url);
-  if (ignore_url == false) {
-    console.log("equal to false");
-  }
   if (ignore_url === "false") {
     if (synced_tab === null) {
-      synced_tab = await createTab(urlLink);
+      synced_tab = await createTab(data.link);
+
     } else {
-      synced_tab = await updateTab(synced_tab, urlLink);
+      synced_tab = await updateTab(synced_tab, data.link);
     }
+    updateSyncedTabs(synced_tab);
   }
+  sendTabId();
+  socket.emit("request_time",{});
 }
 
 function getFaviconFromUrl(url) {
@@ -212,7 +234,6 @@ async function injectScript() {
 
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     // syncedTab = await updateTab(tabs[0]);
-    console.log(tabs[0]);
     synced_tab = tabs[0];
     injectScriptInTab(tabs[0]);
   });
@@ -220,15 +241,17 @@ async function injectScript() {
 
 
 
+
+
 async function handleVideoShare() {
   var current_tab = await getCurrentTab();
-  console.log(synced_tab);
-  if (synced_tab != null && current_tab.id && current_tab.id != synced_tab.id) {
-    // await closeSyncedTab();
+  synced_tab = current_tab;
+  if (!(synced_tab.id in synced_tabs)) {
+    synced_tabs[synced_tab.id] = {};
+    synced_tabs[synced_tab.id].tab = synced_tab;
+    injectScriptInTab(synced_tab);
   }
-  if (current_tab.id) {
-    synced_tab = current_tab;
-  }
+
   favicon = current_tab.favIconUrl;
   video_title = current_tab.title;
   link = current_tab.url;
@@ -237,16 +260,20 @@ async function handleVideoShare() {
     video_title: video_title,
     link: link
   }
-  // sendMessageToPopup("share", message);
+
+  sendMessageToPopup("share", message);
   socket.emit("share", message);
-
-
-  // this is to update in tab
-  // injectScriptInTab(tabs[0]);
-
 }
 
+function sendTabId() {
+  sendMessageToSyncedTab("set_tab_id", { tab_id: synced_tab.id });
+}
+
+
 chrome.tabs.onRemoved.addListener((tabid, removed) => {
+  if (tabid in synced_tabs) {
+    delete synced_tabs[tabid];
+  }
   if (synced_tab !== null && tabid === synced_tab.id) {
     synced_tab = null;
     current_video_time = null;
@@ -254,62 +281,51 @@ chrome.tabs.onRemoved.addListener((tabid, removed) => {
   }
 });
 
-function changeSyncTab() {
-  chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tab) => {
-    if (tabs.length !== 0) {
-      //   if (tabs[0].url === share.url) {
-      setSyncTab(tabs[0]);
-      //   }
+
+chrome.tabs.onUpdated.addListener((tabId, info) => {
+  if (tabId in synced_tabs) {
+    if (info.status == 'complete') {
+      synced_tabs[tabId].injected = false;
     }
-  });
-}
+  }
+});
+
+
 
 chrome.runtime.onMessage.addListener((message, sender) => {
   console.log(message);
-  if (message.from === "popup" && message.action === "videolinkclick") {
-    console.log("---------------------");
-    console.log("joining link");
-    syncTab(message.data);
-    // console.log(msg);
-    // changeSyncTab();
-  } else if (message.from === "popup" && message.action === "share") {
-    handleVideoShare();
-    // injectScript();
-    // console.log(msg);
-    // changeSyncTab();
-    // injectScriptInTab(syncedTab);
-    // chrome.tabs.sendMessage(syncedTab.id, { from: "background", data: "test" });
-  } else if (message.from === "popup" && message.action === "injectscript") {
-    console.log("---------------------");
-    console.log("injecting");
-    injectScriptInTab(synced_tab);
-    // console.log(msg);
-    // changeSyncTab();
-  } else if (message.from === "popup" && message.action === "enter") {
-    // create sync tab
-    console.log("---------------------");
-    handleConnection(message.data);
-
-  } else if (message.from === "popup" && message.action === "disconnect") {
-    socket.disconnect();
-
-  } else if (message.from === "popup" && message.action === "videoclick") {
-    syncTab(message.data);
-
-  } else if (message.from === "popup" && message.action === "test5") {
-    console.log("---------------------");
-    // urlLink = "https://www.youtube.com/watch?v=2SUwOgmvzK4";
-    urllink = "https://www.primevideo.com/detail/0P9FGG4M62XDQOT7XGMJQXREAY/ref=atv_hm_hom_c_6jFCGf_2_2";
-    console.log("url updated");
-  } else if (message.from === "popup" && message.action === "test6") {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      console.log("---------------------");
-      console.log("current page tab is ", tabs[0]);
-    });
-  } else if (message.from === "popup" && message.action === "test7") {
-    socket.emit("hi", { bye: "kadlekai" });
+  if (message.from == "popup") {
+    if (message.action === "video_link_click") {
+      joinVideoWatch(message.data);
+    } else if (message.action === "share") {
+      handleVideoShare();
+    } else if (message.action === "ignore_url_and_sync") {
+      syncCurrentTab();
+    } else if (message.action === "enter") {
+      handleConnection(message.data);
+    } else if (message.action === "disconnect") {
+      socket.disconnect();
+    } else if (message.action === "videoclick") {
+      joinVideoWatch(message.data);
+    }
   }
-  else if (message.from === "content") {
+  else if (message.from == "content") {
+    if (message.tab_id == synced_tab.id) {
+    // tab id synced
+      if(message.action =="transmit_video_event"){
+        socket.emit("transmit_video_event", message.data);
+      }
+      else if (message.action == "get_time") {
+        socket.emit("get_time", message.data);
+      }
+    }
+
+    // tab id isn't synced
+    else if (message.action === "set_tab_id" && !message.data.successful) {
+      sendTabId();
+    }
+  }
+  if (message.from === "content") {
     socket.emit(message.data);
     console.log(message.data);
   }
@@ -335,3 +351,28 @@ chrome.runtime.onMessage.addListener((message, sender) => {
 //     });
 //   });
 // })
+
+// function changeSyncTab() {
+//   chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tab) => {
+//     if (tabs.length !== 0) {
+//       //   if (tabs[0].url === share.url) {
+//       setSyncTab(tabs[0]);
+//       //   }
+//     }
+//   });
+// }
+
+
+// if (message.from === "popup" && message.action === "test5") {
+//   console.log("---------------------");
+//   // urlLink = "https://www.youtube.com/watch?v=2SUwOgmvzK4";
+//   urllink = "https://www.primevideo.com/detail/0P9FGG4M62XDQOT7XGMJQXREAY/ref=atv_hm_hom_c_6jFCGf_2_2";
+//   console.log("url updated");
+// } else if (message.from === "popup" && message.action === "test6") {
+//   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+//     console.log("---------------------");
+//     console.log("current page tab is ", tabs[0]);
+//   });
+// } else if (message.from === "popup" && message.action === "test7") {
+//   socket.emit("hi", { bye: "kadlekai" });
+// }
