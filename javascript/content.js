@@ -55,6 +55,7 @@ function onEvent(event) {
   //	else console.log('event:'+event.type+' '+' recieved: '+recieved+' loading: '+loading);
   if (!eventReceived && newJoineeSynced && tab_id!= null) {
     broadcast(event);
+    
   }
   eventReceived = false;
 }
@@ -62,14 +63,22 @@ function onEvent(event) {
 function handleVideoEvent(data) {
   eventReceived = true;
   console.log("Event data received is", data);
-  nodesCollection[data.element].currentTime = data.currentTime + 5;
+  nodesCollection[data.element].currentTime = data.currentTime;
+  if(data.type === "pause"){
+    nodesCollection[data.element].pause();
+  }else if(data.type === "play"){
+    nodesCollection[data.element].play();
+  }else if(data.type === "ratechange"){
+    nodesCollection[data.element].playbackRate = data.playbackRate;
+  }
 }
 
 
 function addListeners(nodesCollection) {
   // const eventTypes = ['playing', 'pause', 'seeked', 'ratechange', 'progress'];
   // const eventTypes = ['playing', 'seeked', 'ratechange', 'progress'];
-  const eventTypes = ['playing', 'pause', 'seeked', 'ratechange'];
+  // const eventTypes = ['playing', 'pause', 'seeked', 'ratechange', 'progress'];
+  const eventTypes = ['play', 'pause', 'seeked', 'ratechange'];
 
   for (let i = 0; i < nodesCollection.length; i++) {
     for (let j = 0; j < eventTypes.length; j++) {

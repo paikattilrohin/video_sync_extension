@@ -49,11 +49,11 @@ function show_connect_disconnect_elements() {
     share_button_element.className = "show block button";
   }
 
-  if(localStorage.SYNCWINDOW && localStorage.SYNCWINDOW == "true"){
+  if (localStorage.SYNCWINDOW && localStorage.SYNCWINDOW == "true") {
     sync_window_checkbox_element.checked = true;
   }
 
-  else{
+  else {
     sync_window_checkbox_element.checked = false;
   }
 
@@ -76,13 +76,13 @@ function show_connect_disconnect_elements() {
 show_connect_disconnect_elements();
 
 sync_window_checkbox_element.onclick = () => {
-  if(sync_window_checkbox_element.checked){
+  if (sync_window_checkbox_element.checked) {
     localStorage.SYNCWINDOW = true;
-    if(ignore_url_checkbox_element.checked){
+    if (ignore_url_checkbox_element.checked) {
       ignore_url_checkbox_element.click();
     }
   }
-  else{
+  else {
     localStorage.SYNCWINDOW = false;
   }
 };
@@ -129,10 +129,10 @@ connect_element.onclick = () => {
 
 ignore_url_checkbox_element.onclick = () => {
   localStorage.IGNOREURL = ignore_url_checkbox_element.checked;
-  if(ignore_url_checkbox_element.checked) {
+  if (ignore_url_checkbox_element.checked) {
     ignore_url_sync_input_button_element.className = "show block button";
     share_button_element.className = "hide block button";
-    if(sync_window_checkbox_element.checked){
+    if (sync_window_checkbox_element.checked) {
       sync_window_checkbox_element.click();
     }
   }
@@ -219,38 +219,50 @@ function handleConnectionReply(data) {
 
 chrome.runtime.onMessage.addListener((message, sender) => {
   console.log("FROM BACKGROUND", message);
-  if (message.from == 'background' && message.action == 'enter') {
-    console.log("received back");
-    handleConnectionReply(message.data);
-    connect_reply_lock = false;
-  }
-  if (message.from == 'background' && message.action == 'disconnect') {
-    localStorage.USERS = ""
-    connect_reply_lock = false;
-    users_element.innerHTML = "";
-  }
+  if (message.from == "background") {
+    if (message.action == 'enter') {
+      console.log("received back");
+      handleConnectionReply(message.data);
+      connect_reply_lock = false;
+    }
+    else if (message.action == 'disconnect') {
+      localStorage.USERS = ""
+      connect_reply_lock = false;
+      users_element.innerHTML = "";
+    }
 
-  if (message.from == 'background' && message.action == 'share') {
-    console.log(message.data);
-    if (message.data.video_title) {
-      localStorage.VIDEOTITLE = message.data.video_title;
+    else if (message.action == 'share') {
+      console.log(message.data);
+      if (message.data.video_title) {
+        localStorage.VIDEOTITLE = message.data.video_title;
+      }
+      if (message.data.favicon) {
+        localStorage.FAVICON = message.data.favicon;
+      }
+      if (message.data.link) {
+        localStorage.LINK = message.data.link;
+      }
+      console.log(share_button_clicked);
+      if (localStorage.SYNCWINDOW === "true" && !share_button_clicked) {
+        video_link_button_element.click();
+        // TODO: add sync window logic here
+      }
+      show_connect_disconnect_elements();
+      share_button_clicked = false;
+      console.log(share_button_clicked);
     }
-    if (message.data.favicon) {
-      localStorage.FAVICON = message.data.favicon;
+
+    else if (message.action == 'connected_users') {
+      var usersString;
+      for (var user in message.data['connected_users']) {
+        usersString += message.data['connected_users'][key] + "<br>";
+      }
+      localStorage.USERS = usersString;
+      show_connect_disconnect_elements();
     }
-    if (message.data.link) {
-      localStorage.LINK = message.data.link;
-    }
-    console.log(share_button_clicked);
-    if(localStorage.SYNCWINDOW === "true" && !share_button_clicked){
-      video_link_button_element.click();
-      // TODO: add sync window logic here
-    }    
-    show_connect_disconnect_elements();
-    share_button_clicked = false;
-    console.log(share_button_clicked);
   }
-});
+}
+);
 
 
 

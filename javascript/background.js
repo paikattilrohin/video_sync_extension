@@ -59,6 +59,10 @@ async function initSockets() {
     sendMessageToPopup("share", data.video_details);
   });
 
+  socket.on("connected_users", data=>{
+    sendMessageToPopup("connected_users", data);
+  });
+
   socket.on("disconnect", (data) => {
     localStorage.CONNECTED = false;
     sendMessageToPopup("disconnect", {});
@@ -76,7 +80,7 @@ async function initSockets() {
 
   socket.on("transmit_video_event",(data)=>{
     // on receiving video event from others make changes
-    console.log("--->>transmit event received back \n  ", data);
+    console.log(">>>>transmit event received back \n  ", data);
     sendMessageToSyncedTab("receive_video_event", data);
   });
 }
@@ -240,18 +244,16 @@ async function injectScript() {
 }
 
 
-
-
-
 async function handleVideoShare() {
   var current_tab = await getCurrentTab();
   synced_tab = current_tab;
   if (!(synced_tab.id in synced_tabs)) {
     synced_tabs[synced_tab.id] = {};
+    synced_tabs[synced_tab.id].injected = true;
     synced_tabs[synced_tab.id].tab = synced_tab;
-    injectScriptInTab(synced_tab);
   }
-
+  injectScriptInTab(synced_tab);
+  synced_tabs[synced_tab.id].injected = true;
   favicon = current_tab.favIconUrl;
   video_title = current_tab.title;
   link = current_tab.url;
@@ -260,7 +262,6 @@ async function handleVideoShare() {
     video_title: video_title,
     link: link
   }
-
   sendMessageToPopup("share", message);
   socket.emit("share", message);
 }
@@ -293,7 +294,7 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
 
 
 chrome.runtime.onMessage.addListener((message, sender) => {
-  console.log(message);
+  console.log("-----message received by backed listener \n",message);
   if (message.from == "popup") {
     if (message.action === "video_link_click") {
       joinVideoWatch(message.data);
@@ -326,8 +327,8 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     }
   }
   if (message.from === "content") {
-    socket.emit(message.data);
-    console.log(message.data);
+    // socket.emit(message.data);
+    // console.log(message.data);
   }
 });
 
