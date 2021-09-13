@@ -158,21 +158,25 @@ video_link_button_element.onclick = () => {
     action: "video_link_click",
     data: {
       ignore_url: localStorage.IGNOREURL,
-      link: localStorage.LINK
+      link: localStorage.LINK,
+      title: localStorage.VIDEOTITLE
     }
   });
 };
 
 share_button_element.onclick = () => {
-  console.log("setting clicked button to true");
-  share_button_clicked = true;
-  chrome.runtime.sendMessage({
-    from: "popup",
-    action: "share",
-    data: {
-      ignoreurl: localStorage.IGNOREURL
-    }
-  });
+  if (!share_button_clicked) {
+    console.log("setting clicked button to true");
+    share_button_clicked = true;
+    chrome.runtime.sendMessage({
+      from: "popup",
+      action: "share",
+      data: {
+        ignoreurl: localStorage.IGNOREURL
+      }
+    });
+    share_button_element.innerHTML = "sharing..";
+  }
 };
 
 
@@ -242,69 +246,25 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       if (message.data.link) {
         localStorage.LINK = message.data.link;
       }
-      console.log(share_button_clicked);
-      if (localStorage.SYNCWINDOW === "true" && !share_button_clicked) {
-        video_link_button_element.click();
-        // TODO: add sync window logic here
-      }
+      // console.log(share_button_clicked);
+      // if (localStorage.SYNCWINDOW === "true" && !share_button_clicked) {
+      //   video_link_button_element.click();
+      //   // TODO: add sync window logic here
+      // }
       show_connect_disconnect_elements();
       share_button_clicked = false;
-      console.log(share_button_clicked);
+      share_button_element.innerHTML = "share";
     }
 
     else if (message.action == 'connected_users') {
-      var usersString;
-      for (var user in message.data['connected_users']) {
-        usersString += message.data['connected_users'][key] + "<br>";
-      }
-      localStorage.USERS = usersString;
+      // var usersString = "";
+      // for (var key in message.data['connected_users']) {
+      //   usersString += message.data['connected_users'][key] + "<br>";
+      // }
+      // localStorage.USERS = usersString;
       show_connect_disconnect_elements();
     }
   }
 }
 );
 
-
-
-
-
-
-
-// const joinLinkButton = document.getElementById("joinlink");
-
-// const testbutton2 = document.getElementById("testbutton2");
-// const testbutton3 = document.getElementById("testbutton3");
-// const testbutton4 = document.getElementById("testbutton4");
-// const testbutton5 = document.getElementById("testbutton5");
-// const testbutton6 = document.getElementById("testbutton6");
-// const testbutton7 = document.getElementById("testbutton7");
-
-// // joinLinkButton.onclick = () => {
-// //   chrome.runtime.sendMessage({ from: "popup", action: "joinlink" });
-// // };
-
-
-// testbutton3.onclick = () => {
-//   // console.log("Popup: test_button_clicked");
-//   chrome.runtime.sendMessage({ from: "popup", action: "test3" });
-// };
-
-// testbutton4.onclick = () => {
-//   // console.log("Popup: test_button_clicked");
-//   chrome.runtime.sendMessage({ from: "popup", action: "test4" });
-// };
-
-// testbutton5.onclick = () => {
-//   // console.log("Popup: test_button_clicked");
-//   chrome.runtime.sendMessage({ from: "popup", action: "test5" });
-// };
-
-// testbutton6.onclick = () => {
-//   // console.log("Popup: test_button_clicked");
-//   chrome.runtime.sendMessage({ from: "popup", action: "test6" });
-// };
-
-// testbutton7.onclick = () => {
-//   // console.log("Popup: test_button_clicked");
-//   chrome.runtime.sendMessage({ from: "popup", action: "test7" });
-// };

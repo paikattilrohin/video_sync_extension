@@ -68,25 +68,35 @@ https://genfavicon.com/
 
 
 
+Things to do:
 
-Hi, 
-
-I am Rohin Paikattil, an Ex- Nokia employee, my last working day was March 25th, 2021. I was instructed to contact you to withdraw from my provident fund. I wish to withdraw all the money, can you please help with this process.
-
-The following are my details. 
-
-My Date of birth:  23 July 1995.
-Date of joining: Internship January 10th 2018                         
-                         Full Time July 2nd 2018
-Date of Exit: March 25th 2021
-Employee code: 62132044 
-Thanks,
- Rohin Paikattil
+--> 
+--> other person sharing new video and if autoshare is turned off then stop syncing that video on client 
+--> share video event should be successful once it is received back from server and not sent to pop up directly
+--> join link doesn't start with the correct time poll for time 
+--> video double loop pause while playing pause 
 
 
 
+day 2)
 
-1) National Identification number
-2) Has anyone ever filed an immigrant petition on your behalf with the united states
-3) Do you wish to provide information about your presence on any other websites or applications you have used within the last five years to create or share content (photos, videos, status updates, etc.)? 
-4) Mary Ghanska **email id and **phone number and **zipcode
+--> fix time start for new joinee
+--> share button not working properly 
+--> video back and forth milliseconds issue
+
+
+day 3) 
+--> fix multiple login  --> done more or less
+--> autoshare fix  --> done more or less
+--> move all local storage items to background script  --> done more or less
+
+--> time jig jig ---> somewhat done 
+--> youtube playlist fix  --> 
+--> disconnect afk sockets   --> 
+--> new joinee start time fix again
+--> unsynced 
+
+
+--> get time when no tab synced or unsynced handle
+
+--> 
