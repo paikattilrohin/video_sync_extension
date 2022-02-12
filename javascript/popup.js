@@ -20,7 +20,6 @@ let connect_reply_lock = false;
 let share_button_clicked = false;
 
 function show_connect_disconnect_elements() {
-  // console.log("show hide");
   if (localStorage.NAME) {
     username_element.value = localStorage.NAME;
   }
@@ -183,7 +182,6 @@ share_button_element.onclick = () => {
 function handleConnectionReply(data) {
   console.log("Handling change");
   if (data['successful'] == true) {
-    // connect button transition
     connection_reply.className = "hide_error";
     connection_reply.innerHTML = "";
     connect_element.value = "Disconnect";
@@ -246,22 +244,13 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       if (message.data.link) {
         localStorage.LINK = message.data.link;
       }
-      // console.log(share_button_clicked);
-      // if (localStorage.SYNCWINDOW === "true" && !share_button_clicked) {
-      //   video_link_button_element.click();
-      //   // TODO: add sync window logic here
-      // }
+
       show_connect_disconnect_elements();
       share_button_clicked = false;
       share_button_element.innerHTML = "share";
     }
 
     else if (message.action == 'connected_users') {
-      // var usersString = "";
-      // for (var key in message.data['connected_users']) {
-      //   usersString += message.data['connected_users'][key] + "<br>";
-      // }
-      // localStorage.USERS = usersString;
       show_connect_disconnect_elements();
     }
   }

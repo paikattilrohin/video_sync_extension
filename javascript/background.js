@@ -1,4 +1,3 @@
-// let syncTab = null;
 let synced_tab = null;
 let ignore_url = false;
 let synced_url = null;
@@ -38,7 +37,6 @@ async function initSockets() {
 
 
   catch (error) {
-    // set connected state to false everytime 
     localStorage.CONNECTED = false;
   }
 
@@ -68,7 +66,6 @@ async function initSockets() {
     localStorage.VIDEOTITLE = data.video_details.video_title;
     localStorage.FAVICON = data.video_details.favicon;
 
-    // auto click on auto share
     if (localStorage.SYNCWINDOW === "true") {
       if (!shareLock) {
         data.video_details.ignore_url = localStorage.IGNOREURL;
@@ -115,7 +112,6 @@ async function initSockets() {
   });
 
   socket.on("transmit_video_event", (data) => {
-    // on receiving video event from others make changes
     console.log(">>>>event received back \n  ", data);
     if (!synced_tabs[synced_tab.id].unsynced) {
       sendMessageToSyncedTab("receive_video_event", data);
@@ -137,7 +133,6 @@ function syncCurrentTab() {
   socket.emit("request_time", {});
 }
 
-// method  =  function in java
 function injectScriptInTab(tab) {
   if (tab !== null) {
     console.log("injecting to script");
@@ -155,8 +150,7 @@ function injectScriptInTab(tab) {
         }
       }
     );
-    // updateSyncedTabs(tab);  //   <----------- Tab synced here
-    // synced_tabs[tab.id].injected = true;
+
     console.log("Injected successful");
   }
 }
@@ -204,7 +198,6 @@ async function handleConnection(data) {
     initSockets();
     await timeout(200);
   }
-  // connect_error caught in 
   socket.emit('enter', data);
 }
 
@@ -273,8 +266,7 @@ async function joinVideoWatch(data) {
     synced_tabs[synced_tab.id].just_injected = true;
     synced_tabs[synced_tab.id].unsynced = true;
   }
-  // sendTabId();
-  // socket.emit("request_time", {});
+  
 }
 
 function getFaviconFromUrl(url) {
@@ -305,7 +297,6 @@ async function handleVideoShare() {
     video_title: video_title,
     link: link
   }
-  // sendMessageToPopup("share", message);
   socket.emit("share", message);
 }
 
@@ -334,12 +325,11 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
         if (ignore_window_change && info.status == "complete") ignore_window_change = false;
 
         if (tab.url != synced_url && !ignore_window_change) {
-          // if(tab.title != synced_tab_title){
 
           synced_tabs[tabId].unsynced = true;
           console.log("tab unsynced", tab);
           console.log("tab title: -> ", tab.title, " \n Sycned tab title:", synced_tab_title);
-          // console.log("tab url  => ",  tab.url , "   synced_url ", synced_url);
+
 
           sendMessageToSyncedTab('stop_syncing', {});
         }
@@ -374,7 +364,6 @@ chrome.runtime.onMessage.addListener((message, sender) => {
 
   else if (message.from == "content") {
     if (message.tab_id == synced_tab.id && synced_tabs[synced_tab.id].unsynced == false) {
-      // tab id synced
       if (message.action == "transmit_video_event") {
         console.log("transmitting event");
         if (!synced_tabs[synced_tab.id].unsynced) {
@@ -385,11 +374,10 @@ chrome.runtime.onMessage.addListener((message, sender) => {
         socket.emit("get_time", message.data);
       }
     }
-    // tab id isn't synced
     else if (message.action === "set_tab_id") {
       if (!message.data.successful) {
         sendTabId();
-        // sending tab id initially and also changing to new time from others
+
         if (message.data.request_time) {
           socket.emit("request_time");
         }
@@ -401,61 +389,3 @@ chrome.runtime.onMessage.addListener((message, sender) => {
   }
 
 });
-
-
-
-// chrome.tabs.query({active:true, currentWindow: true}, function(tabs){
-//   chrome.tabs.sendMessage(tabs[0].id, {from: "background", data: "test"});
-// });
-
-// chrome.tabs.create({
-//   url: 'synced_tab.html'
-// });
-
-// chrome.extension.onConnect.addListener(function (port) {
-//   console.log("Connected .....");
-//   port.onMessage.addListener(function (msg) {
-//     console.log(msg);
-//     var message = JSON.parse(msg);
-//     // console.log("")
-//     console.log("message recieved " + message['login']['username']);
-//     port.postMessage({
-//       result: "success",
-//     });
-//   });
-// })
-
-// function changeSyncTab() {
-//   chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tab) => {
-//     if (tabs.length !== 0) {
-//       //   if (tabs[0].url === share.url) {
-//       setSyncTab(tabs[0]);
-//       //   }
-//     }
-//   });
-// }
-
-
-// if (message.from === "popup" && message.action === "test5") {
-//   console.log("---------------------");
-//   // urlLink = "https://www.youtube.com/watch?v=2SUwOgmvzK4";
-//   urllink = "https://www.primevideo.com/detail/0P9FGG4M62XDQOT7XGMJQXREAY/ref=atv_hm_hom_c_6jFCGf_2_2";
-//   console.log("url updated");
-// } else if (message.from === "popup" && message.action === "test6") {
-//   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-//     console.log("---------------------");
-//     console.log("current page tab is ", tabs[0]);
-//   });
-// } else if (message.from === "popup" && message.action === "test7") {
-//   socket.emit("hi", { bye: "kadlekai" });
-// }
-
-
-// async function injectScript() {
-
-//   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-//     // syncedTab = await updateTab(tabs[0]);
-//     synced_tab = tabs[0];
-//     injectScriptInTab(tabs[0]);
-//   });
-// }

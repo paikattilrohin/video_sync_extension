@@ -46,8 +46,7 @@ function broadcast(event) {
     currentTime: event.target.currentTime,
     playbackRate: event.target.playbackRate,
   };
-  // if (eventSend.type === 'progress') eventSend.type = 'pause';
-  // else if (eventSend.type === 'playing') eventSend.type = 'play';
+  
   sendMessageToBackground({
     from: 'content',
     action: 'transmit_video_event',
@@ -56,32 +55,6 @@ function broadcast(event) {
 
 }
 
-// function onEvent(event) {
-
-//   // if (!eventReceived && newJoineeSynced && tab_id!= null && !stopSyncing) {
-//   // if (!eventReceived && tab_id != null && !stopSyncing) {
-//   var video_index = video_listeners.indexOf(event.target);
-//   if (lastEventReceived[video_index] && !stopSyncing ) {
-//     // if ((event.type != lastEventReceived[video_index].type ||
-//     //   Math.abs(event.target.currentTime - lastEventReceived[video_index].currentTime) > 1 ||
-//     //   event.target.playbackRate != lastEventReceived[video_index].playbackRate) && !stopSyncing) {
-//     //   broadcast(event);
-//     // }
-//     console.log( Math.abs(event.target.currentTime - lastEventReceived[video_index].currentTime));
-//     if ( ( Math.abs(event.target.currentTime - lastEventReceived[video_index].currentTime) > 1 || 
-//       event.target.playbackRate != lastEventReceived[video_index].playbackRate) ) {
-//       broadcast(event);
-//     }
-//     else if( (event.type == "pause" || event.type == "play")
-//          && lastEventReceived[video_index].type != event.type){
-//       broadcast(event);
-//     }
-//   }
-//   else {
-//     broadcast(event);
-//   }
-//   // eventReceived = false;
-// }
 
 function getDetailsFromEvent(event) {
   const eventSend = {
@@ -94,47 +67,7 @@ function getDetailsFromEvent(event) {
   return eventSend;
 }
 
-// function onEvent(event) {
 
-
-//   var video_index = video_listeners.indexOf(event.target);
-//   if (lastEventReceived[video_index] && !stopSyncing) {
-//     // if ((event.type != lastEventReceived[video_index].type ||
-//     //   Math.abs(event.target.currentTime - lastEventReceived[video_index].currentTime) > 1 ||
-//     //   event.target.playbackRate != lastEventReceived[video_index].playbackRate) && !stopSyncing) {
-//     //   broadcast(event);
-//     // }
-//     console.log("event time difference ",Math.abs(event.target.currentTime - lastEventReceived[video_index].currentTime));
-//     if(lastEventReceived[video_index].type == "play"){
-//       if(Math.abs(event.target.currentTime - lastEventReceived[video_index].currentTime) >0.5){
-//         broadcast(event);
-//         lastEventReceived[video_index] = getDetailsFromEvent(event);
-//       }
-//     }
-//     else if (lastEventReceived[video_index].type== "pause"){
-//       if(Math.abs(event.target.currentTime - lastEventReceived[video_index].currentTime) >0.5){
-//         broadcast(event);
-//         lastEventReceived[video_index] = getDetailsFromEvent(event);
-//       }
-//       if(event.target.type == "play"){
-//         broadcast(event);
-//         lastEventReceived[video_index] = getDetailsFromEvent(event);
-//       }
-//     }
-//     else if(lastEventReceived[video_index].type == "ratechange"){
-//       if(lastEventReceived[video_index].playbackRate != event.target.playbackRate){
-//         broadcast(event);
-//         lastEventReceived[video_index] = getDetailsFromEvent(event);
-//       }
-//     }
-
-//   }
-//   else {
-//     broadcast(event);
-//   }
-//   previousEvent = event;
-//   // eventReceived = false;
-// }
 
 function onEvent(event) {
 
@@ -151,22 +84,13 @@ function onEvent(event) {
           broadcast(event);
           lastEventReceived = getDetailsFromEvent(event);
         }
-        // else {
-        //   if (lastEventReceived[video_index].currentTime != event.target.currentTime) {
 
-        //   }
-        // }
       }
       else if (event.type === "pause") {
         if (Math.abs(event.target.currentTime - lastEventReceived[video_index].currentTime) > 0.5) {
           broadcast(event);
           lastEventReceived = getDetailsFromEvent(event);
         }
-        // else {
-        //   if (lastEventReceived[video_index].currentTime != event.target.currentTime) {
-
-        //   }
-        // }
       }
       else if (event.type === "ratechange") {
         if (event.target.playbackRate != lastEventReceived[video_index].playbackRate) {
@@ -175,20 +99,13 @@ function onEvent(event) {
         }
       }
 
-      // else if (event.type === "seeked"){
-      //   if (Math.abs(event.target.currentTime - lastEventReceived[video_index].currentTime) > 0.5) {
-      //     broadcast(event);
-      //     lastEventReceived = getDetailsFromEvent(event);
-      //   }
-      // }
-
     }
     else {
       console.log("sending from everything broadcast");
       broadcast(event);
     }
   }
-  // eventReceived = false;
+
 }
 
 
@@ -209,7 +126,6 @@ function handleVideoEvent(data) {
 
 function addListeners(videoElements) {
   const eventTypes = ['play', 'pause', 'ratechange'];
-  // const eventTypes = ['play', 'pause', 'seeked' ,'ratechange'];
 
   for (let i = 0; i < videoElements.length; i++) {
     for (let j = 0; j < eventTypes.length; j++) {
@@ -241,7 +157,6 @@ chrome.runtime.onMessage.addListener((message) => {
     }
 
     else if (message.action == "start_video") {
-      // setting all videos in page to same start conditions
       for (var video_id in message.data) {
         eventReceived = true;
         lastEventReceived[message.data[video_id]] = message.data[video_id];
@@ -306,154 +221,3 @@ chrome.runtime.sendMessage(tabid_not_set_message);
 console.log("Injected");
 
 
-
-// function onEvent(event) {
-//   //	if (event.type === 'progress') console.log('event:'+event.type+' '+event.target.readyState+' recieved: '+recieved+' loading: '+loading);
-//   //	else console.log('event:'+event.type+' '+' recieved: '+recieved+' loading: '+loading);
-//   if (recieved) {
-//     if (recievedEvent === 'play') {
-//       if (event.type === 'progress') {
-//         onProgress(event);
-//         recieved = false;
-//       } else if (event.type === 'playing') recieved = false;
-//     } else if (recievedEvent === 'pause') {
-//       if (event.type === 'seeked') recieved = false;
-//     } else if (recievedEvent === event.type) recieved = false;
-//   } else if (event.type === 'seeked') {
-//     if (event.target.paused) broadcast(event);
-//   } else if (event.type === 'progress') {
-//     onProgress(event);
-//   } else broadcast(event);
-// }
-
-// function addListeners(nodesCollection) {
-//   const eventTypes = ['playing', 'pause', 'seeked', 'ratechange', 'progress'];
-//   for (let i = 0; i < nodesCollection.length; i++) {
-//     for (let j = 0; j < eventTypes.length; j++) {
-//       nodesCollection[i].addEventListener(eventTypes[j], onEvent, true);  
-//     }
-//   }
-// }
-
-// function init() {
-//   const nodesCollection = document.getElementsByTagName('video');
-//   addListeners(nodesCollection);
-//   nodes = Array.from(nodesCollection);
-// }
-
-// init();
-
-// const observer = new MutationObserver(() => {
-//   init();
-// });
-
-// observer.observe(document.body, {
-//   childList: true,
-//   subtree: true,
-// });
-
-
-// function pause(){
-//     nodesCollection = document.getElementsByTagName('video');
-//     console.log(nodesCollection);
-//     nodes = Array.from(nodesCollection);
-//     for(var i = 0; i < nodes.length; i++){
-//         console.log("trying to pause");
-//         nodes[i].pause();
-//       }
-//       sendMessageInRuntime("hi");
-// }
-
-
-/*
-function onProgress(event) {
-  const prevLoading = loading;
-  if (event.target.readyState < 3) {
-    loading = true;
-  }
-  else {
-    loading = false;
-  }
-  if (prevLoading === false && loading === true) {
-    broadcast(event);
-  }
-}
-
-function broadcast(event) {
-
-  const eventSend = {
-    type: event.type,
-    element: video_listeners.indexOf(event.target),
-    currentTime: event.target.currentTime,
-    playbackRate: event.target.playbackRate,
-  };
-  if (eventSend.type === 'progress') eventSend.type = 'pause';
-  else if (eventSend.type === 'playing') eventSend.type = 'play';
-  sendMessageToBackground({
-    from: 'content',
-    action: 'transmit_video_event',
-    data: eventSend
-  });
-
-}
-
-
-function onEvent(event) {
-
-  if (eventReceived && !stopSyncing) {
-    var video_index = video_listeners.indexOf(event.target);
-
-    if (lastEventReceived[video_index].type === 'play') {
-      if (event.type === 'progress') {
-        onProgress(event);
-        eventReceived = false;
-      } else if (event.type === 'playing'){
-        eventReceived = false;
-      }
-    }
-    else if (lastEventReceived[video_index].type === 'pause') {
-      if (event.type === 'seeked') eventReceived = false;
-    }
-    else if (lastEventReceived[video_index].type === event.type){
-      eventReceived = false;
-    }
-  }
-
-  else if (event.type === 'seeked') {
-    if (event.target.paused) broadcast(event);
-  }
-  else if (event.type === 'progress') {
-    onProgress(event);
-  }
-  else broadcast(event);
-}
-
-function handleVideoEvent(data) {
-  if (data.type === "pause") {
-    all_video_elements[data.element].pause();
-    all_video_elements[data.element].currentTime = data.currentTime;
-  }
-  else if (data.type === "play") {
-    all_video_elements[data.element].currentTime = data.currentTime;
-    all_video_elements[data.element].play();
-  }
-  else if (data.type === "ratechange") {
-    all_video_elements[data.element].playbackRate = data.playbackRate;
-  }
-  else if (data.type === "seeked") {
-    all_video_elements[data.element].currentTime = data.currentTime;
-  }
-}
-
-
-function addListeners(videoElements) {
-  const eventTypes = ['playing', 'pause', 'seeked', 'ratechange', 'progress'];
-  // const eventTypes = ['play', 'pause', 'seeked' ,'ratechange'];
-
-  for (let i = 0; i < videoElements.length; i++) {
-    for (let j = 0; j < eventTypes.length; j++) {
-      videoElements[i].addEventListener(eventTypes[j], onEvent, true);
-    }
-  }
-}
-*/
