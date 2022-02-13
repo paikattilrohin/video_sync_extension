@@ -13,4 +13,5 @@ https://user-images.githubusercontent.com/39897345/153735562-77538dc7-beaa-42db-
 
 
 
-Download plugin from https://app-downloads.herokuapp.com/ 
+
+Can also Download plugin from https://app-downloads.herokuapp.com/ and follow the steps for installation.
