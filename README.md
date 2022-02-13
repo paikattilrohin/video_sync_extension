@@ -1,8 +1,8 @@
 # video_sync_extension
 
-Video Syncing Extension to sync HTML5 video
+Video Syncing Extension to sync HTML5 video across multiple platforms
 
-Press share to share the video 
+The following video shows is how the plugin behaves.
 
 https://user-images.githubusercontent.com/39897345/153738894-eb4894e3-b430-40c2-bd59-1fb3d7f5fa45.mp4
 
