@@ -1,4 +1,4 @@
-# video_sync_extension
+# Videosync Extension
 
 Video Syncing Extension to sync HTML5 video across multiple platforms
 
